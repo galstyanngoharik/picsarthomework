@@ -66,6 +66,7 @@ class BST {
 
     delete(value) {
         this.#root = this.#_delete(this.#root, value);
+        this.#size--;
     }
 
     contains(value) {
@@ -178,17 +179,14 @@ class BST {
     postorder_itr() {
         let res = [];
         if(!this.#root) { return res; }
-        let queue = [this.#root];
-       
-        while(queue.length) {
-            let curr = queue.shift();
-            //res.push(curr.value);
-            if(curr.left) { queue.push(curr.left); }
-            if(curr.right) { queue.push(curr.right); }
-            res.push(curr.value);
-            
+        let stack = [this.#root];
+        while(stack.length) {
+            let node = stack.pop();
+            res.push(node.value);
+            if(node.left) { stack.push(node.left); }
+            if(node.right) { stack.push(node.right); }
         }
-        return res;
+        return res.reverse();
     }
 
     find_successor(value) {
@@ -234,7 +232,7 @@ class BST {
     }
 
     toArray() {
-       return this.#_inorder();
+       return this.inorder_rec();
     }
 
     clone() {
@@ -292,9 +290,9 @@ class BST {
             if(!node.right) { return node.left; }
             if(!node.left) { return node.right; }
             if(node.left && node.right) { 
-                const tmp = this.find_successor(node)
-                this.delete(tmp);
+                const tmp = this.find_successor(node.value);
                 node.value = tmp;
+                node.right = this.#_delete(node.right, tmp);
                 return node; 
             }
         }
@@ -329,18 +327,27 @@ class BST {
     #_preorder(node, result) {
         if (!node) return result;
         result.push(node.value);
-        this.#_inorder(node.left, result);
-        this.#_inorder(node.right, result);
+        this.#_preorder(node.left, result);
+        this.#_preorder(node.right, result);
         return result;
     }
 
     #_postorder(node, result) {
         if (!node) return result;
-        this.#_inorder(node.left, result);
-        this.#_inorder(node.right, result);
+        this.#_postorder(node.left, result);
+        this.#_postorder(node.right, result);
         result.push(node.value);
         return result;
     }
+    countNodes() {
+    if(!this.#root) { return 0; }
+    function helper(node) {
+        if(!node) { return 0; }
+        if(!node.left && !node.right) { return count; }
+        return 1 + helper(node.left) + helper(node.right);
+    }
+    return helper(this.#root);
+}
 }
 
 let bst = new BST();
@@ -349,12 +356,17 @@ bst.insertR(7);
 
 bst.insertR(4);
 bst.insertR(20);
+bst.insertR(34);
+bst.insertR(18);
+
 
 
 bst.insertI(15);
+//bst.delete(10);
+
 //bst.insertI(14);
 //bst.insertI(13);
-
+console.log(bst.inorder_rec());
 
  console.log(bst.validate_BST());
 // console.log(bst.size());
@@ -370,3 +382,4 @@ bst.insertI(15);
 // }
 console.log(bst.find_successor(30));
 console.log(bst.is_balanced());
+console.log(bst.countNodes())
